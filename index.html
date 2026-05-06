@@ -235,12 +235,17 @@
       </p>
 
       <!-- Replace YOUR_FORMSPREE_ID after creating a free Formspree form -->
-      <form id="signupForm" action="https://formspree.io/f/xkoyzola" method="POST">
-        <input type="email" name="email" placeholder="EMAIL" required />
-        <input type="text" name="wallet" placeholder="SOLANA WALLET" required />
-        <button class="submit" type="submit">SUBMIT</button>
-      </form>
+      <form id="signupForm" action="https://api.web3forms.com/submit" method="POST">
 
+  <input type="hidden" name="access_key" value="05642f65-c206-4309-8bb2-e7fb36a3355b">
+
+  <input type="email" name="email" placeholder="EMAIL" required />
+
+  <input type="text" name="wallet" placeholder="SOLANA WALLET" required />
+
+  <button class="submit" type="submit">SUBMIT</button>
+
+</form>
       <div class="status" id="status"></div>
       <p class="small">No automatic airdrop. No promise. Manual distribution only.</p>
     </section>
@@ -317,26 +322,37 @@
     const statusBox = document.getElementById("status");
 
     form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      statusBox.textContent = "SENDING...";
+  event.preventDefault();
 
-      try {
-        const response = await fetch(form.action, {
-          method: "POST",
-          body: new FormData(form),
-          headers: { "Accept": "application/json" }
-        });
+  statusBox.textContent = "SENDING...";
 
-        if (response.ok) {
-          statusBox.textContent = "RECEIVED.";
-          form.reset();
-        } else {
-          statusBox.textContent = "FORM CONNECTION ERROR.";
-        }
-      } catch (error) {
-        statusBox.textContent = "NETWORK ERROR.";
-      }
+  const formData = new FormData(form);
+  const object = Object.fromEntries(formData);
+  const json = JSON.stringify(object);
+
+  try {
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: json
     });
+
+    const result = await response.json();
+
+    if (result.success) {
+      statusBox.textContent = "RECEIVED.";
+      form.reset();
+    } else {
+      statusBox.textContent = "ERROR.";
+    }
+
+  } catch (error) {
+    statusBox.textContent = "NETWORK ERROR.";
+  }
+});
   </script>
 </body>
 </html>
