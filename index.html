@@ -67,6 +67,41 @@
       animation: float 5s ease-in-out infinite;
     }
 
+
+.pump-link {
+  position: fixed;
+  bottom: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  color: rgba(223, 255, 218, 0.34);
+  border: 1px solid rgba(57, 255, 20, 0.18);
+  padding: 9px 16px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  background: rgba(0, 0, 0, 0.28);
+  transition: 0.2s ease;
+}
+
+.pump-link:hover {
+  color: rgba(146, 255, 122, 0.82);
+  border-color: rgba(57, 255, 20, 0.45);
+  background: rgba(57, 255, 20, 0.06);
+}
+
+.ticker-mark {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  color: rgba(223, 255, 218, 0.24);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+}
+    
+
     .hint {
       position: fixed;
       bottom: 28px;
@@ -221,7 +256,14 @@
     </button>
   </main>
 
-  <div class="hint">CLICK THE CHIP</div>
+  <a 
+  class="pump-link" 
+  href="https://pump.fun/coin/CJJF8efaKChENbfQ92ou4eJSFyiQ2YwxSojWGuKapump" 
+  target="_blank">
+  OPEN PUMP
+</a>
+
+<div class="ticker-mark">#TCHIP</div>
 
   <div class="modal-bg" id="modalBg">
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
