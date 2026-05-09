@@ -380,7 +380,13 @@
 
     const form = document.getElementById("signupForm");
     const statusBox = document.getElementById("status");
+    const submitButton = form.querySelector(".submit");
+    const alreadyClaimed = localStorage.getItem("tchip_claimed");
 
+    if (alreadyClaimed === "true") {
+    form.style.display = "none";
+     statusBox.textContent = "ACCESS ALREADY CLAIMED FROM THIS DEVICE.";
+}
     form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -403,11 +409,13 @@
     const result = await response.json();
 
     if (result.success) {
-      statusBox.textContent = "RECEIVED.";
-      form.reset();
-    } else {
-      statusBox.textContent = "ERROR.";
-    }
+  localStorage.setItem("tchip_claimed", "true");
+  statusBox.textContent = "RECEIVED. ACCESS LOCKED TO THIS DEVICE.";
+  form.reset();
+  form.style.display = "none";
+} else {
+  statusBox.textContent = "ERROR.";
+}
 
   } catch (error) {
     statusBox.textContent = "NETWORK ERROR.";
