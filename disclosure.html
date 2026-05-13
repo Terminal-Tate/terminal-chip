@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Terminal Chip | Access Notice</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --g: #39ff14;
+      --g2: #92ff7a;
+      --text: #dfffda;
+      --muted: rgba(223, 255, 218, 0.58);
+      --faint: rgba(223, 255, 218, 0.28);
+      --line: rgba(57, 255, 20, 0.18);
+      --panel: rgba(0, 8, 1, 0.9);
+      --warn: rgba(255, 214, 92, 0.86);
+      --danger: rgba(255, 92, 92, 0.82);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #000;
+      color: var(--text);
+      font-family: "Share Tech Mono", monospace;
+      overflow-x: hidden;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.14;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(57, 255, 20, 0.14), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(57, 255, 20, 0.06), transparent 40%),
+        linear-gradient(to bottom, rgba(0,0,0,0.08), #000 92%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.16) 3px
+      );
+    }
+
+    .shell {
+      position: relative;
+      z-index: 5;
+      width: min(980px, 92vw);
+      margin: 0 auto;
+      padding: 44px 0 64px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      color: var(--faint);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--g2);
+    }
+
+    .chip-mark {
+      width: 31px;
+      height: 31px;
+      border: 1px solid rgba(57,255,20,0.42);
+      display: grid;
+      place-items: center;
+      color: var(--g);
+      box-shadow: 0 0 18px rgba(57,255,20,0.12);
+    }
+
+    .return-link {
+      color: rgba(223,255,218,0.48);
+      text-decoration: none;
+      border: 1px solid rgba(57,255,20,0.18);
+      padding: 9px 14px;
+      background: rgba(0,0,0,0.32);
+      transition: 0.2s ease;
+    }
+
+    .return-link:hover {
+      color: var(--g2);
+      border-color: rgba(57,255,20,0.48);
+      background: rgba(57,255,20,0.06);
+    }
+
+    .hero {
+      position: relative;
+      border: 1px solid var(--line);
+      background: linear-gradient(160deg, rgba(0, 10, 1, 0.92), rgba(0, 0, 0, 0.96));
+      padding: 38px;
+      box-shadow: 0 0 42px rgba(57, 255, 20, 0.08);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--g), transparent);
+      opacity: 0.42;
+    }
+
+    .hero::after {
+      content: "#TCHIP";
+      position: absolute;
+      right: -8px;
+      bottom: -24px;
+      font-size: clamp(56px, 13vw, 150px);
+      letter-spacing: 0.08em;
+      color: rgba(57,255,20,0.035);
+      pointer-events: none;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(146,255,122,0.56);
+      border: 1px solid rgba(57,255,20,0.16);
+      padding: 6px 10px;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      margin-bottom: 18px;
+    }
+
+    .kicker::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      background: var(--g);
+      box-shadow: 0 0 10px rgba(57,255,20,0.7);
+    }
+
+    h1 {
+      position: relative;
+      color: var(--g2);
+      font-size: clamp(34px, 7vw, 72px);
+      line-height: 1;
+      letter-spacing: 0.1em;
+      font-weight: 400;
+      margin-bottom: 16px;
+      text-shadow: 0 0 26px rgba(57,255,20,0.18);
+    }
+
+    .subtitle {
+      position: relative;
+      max-width: 770px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+      letter-spacing: 0.06em;
+    }
+
+    .status-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid rgba(57,255,20,0.12);
+      margin-top: 26px;
+      background: rgba(57,255,20,0.025);
+    }
+
+    .status-cell {
+      padding: 14px;
+      border-right: 1px solid rgba(57,255,20,0.08);
+    }
+
+    .status-cell:last-child {
+      border-right: 0;
+    }
+
+    .status-label {
+      color: rgba(223,255,218,0.3);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      margin-bottom: 6px;
+    }
+
+    .status-value {
+      color: var(--g2);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+    }
+
+    .warning {
+      margin-top: 18px;
+      border: 1px solid rgba(255,214,92,0.28);
+      background: rgba(95, 62, 0, 0.12);
+      padding: 20px;
+      color: rgba(255,238,185,0.82);
+      font-size: 13px;
+      line-height: 1.68;
+      letter-spacing: 0.05em;
+    }
+
+    .warning strong {
+      color: var(--warn);
+      font-weight: 400;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 220px;
+      border: 1px solid rgba(57,255,20,0.14);
+      background: linear-gradient(160deg, rgba(0, 8, 1, 0.86), rgba(0,0,0,0.94));
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(57,255,20,0.42), transparent);
+      opacity: 0.5;
+    }
+
+    .card-num {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      color: rgba(57,255,20,0.055);
+      font-size: 44px;
+      line-height: 1;
+    }
+
+    .card h2 {
+      position: relative;
+      color: var(--g2);
+      font-weight: 400;
+      font-size: 17px;
+      line-height: 1.35;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+      padding-right: 40px;
+    }
+
+    .card p,
+    .card li {
+      color: rgba(223,255,218,0.58);
+      font-size: 13px;
+      line-height: 1.68;
+      letter-spacing: 0.05em;
+    }
+
+    .card ul {
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .card li {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .card li::before {
+      content: ">";
+      position: absolute;
+      left: 0;
+      color: var(--g);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .terminal-line {
+      margin-top: 18px;
+      border: 1px solid rgba(57,255,20,0.16);
+      background: rgba(0,0,0,0.74);
+      padding: 22px;
+      text-align: center;
+      color: var(--g2);
+      font-size: clamp(14px, 2vw, 18px);
+      line-height: 1.65;
+      letter-spacing: 0.1em;
+      box-shadow: inset 0 0 24px rgba(57,255,20,0.025);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      color: rgba(223,255,218,0.7);
+      text-decoration: none;
+      border: 1px solid rgba(57,255,20,0.22);
+      padding: 11px 18px;
+      background: rgba(0,0,0,0.34);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      color: var(--g2);
+      border-color: rgba(57,255,20,0.5);
+      background: rgba(57,255,20,0.06);
+      box-shadow: 0 0 24px rgba(57,255,20,0.12);
+    }
+
+    footer {
+      margin-top: 28px;
+      padding-bottom: 6px;
+      color: rgba(223,255,218,0.24);
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.6;
+      letter-spacing: 0.16em;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(94vw, 980px);
+        padding-top: 24px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .brand,
+      .return-link {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .hero {
+        padding: 28px 20px;
+      }
+
+      .status-grid,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-cell {
+        border-right: 0;
+        border-bottom: 1px solid rgba(57,255,20,0.08);
+      }
+
+      .status-cell:last-child {
+        border-bottom: 0;
+      }
+
+      .card {
+        min-height: auto;
+        padding: 22px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <main class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="chip-mark">#</div>
+        TERMINAL CHIP / TCHIP
+      </div>
+      <a class="return-link" href="index.html">RETURN TO CHIP</a>
+    </div>
+
+    <section class="hero">
+      <div class="kicker">ACCESS NOTICE</div>
+      <h1>TERMINAL CHIP DISCLOSURE</h1>
+      <p class="subtitle">
+        Terminal Chip is a minimal hidden-layer access page connected to the wider TATE AI archive universe. This notice explains the manual list, wallet submission flow, crypto risk, fictional interface language, and user responsibility.
+      </p>
+
+      <div class="status-grid">
+        <div class="status-cell">
+          <div class="status-label">PROJECT TYPE</div>
+          <div class="status-value">HIDDEN ACCESS LAYER</div>
+        </div>
+        <div class="status-cell">
+          <div class="status-label">DISTRIBUTION</div>
+          <div class="status-value">MANUAL REVIEW ONLY</div>
+        </div>
+        <div class="status-cell">
+          <div class="status-label">FINANCIAL STATUS</div>
+          <div class="status-value">NO PROMISES</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="warning">
+      <strong>IMPORTANT:</strong> Crypto assets are volatile and risky. You may lose all money or value connected to any crypto asset you choose to buy, hold, sell, receive, transfer, or interact with. Nothing on this website is financial advice, legal advice, tax advice, trading advice, or a promise of profit.
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="card-num">01</div>
+        <h2>WHAT TERMINAL CHIP IS</h2>
+        <p>
+          Terminal Chip is a separate hidden-layer experience connected to the TATE AI ecosystem. It is designed as a quiet access point, not as a normal landing page. The page uses minimal visual language, a coin interface, a manual list, and a hidden terminal feeling.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">02</div>
+        <h2>NO AUTOMATIC AIRDROP</h2>
+        <p>
+          Submitting an email or Solana wallet does not guarantee that a user will receive anything. There is no automatic airdrop, no guaranteed allocation, no guaranteed delivery, no guaranteed timing, and no entitlement created by submitting the form.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">03</div>
+        <h2>MANUAL REVIEW</h2>
+        <p>
+          The list is reviewed manually. A submitted wallet may be accepted, ignored, rejected, delayed, or removed at any time. Manual review exists to reduce spam, bots, repeated claims, and low-quality submissions.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">04</div>
+        <h2>NO FINANCIAL PROMISE</h2>
+        <ul>
+          <li>No guaranteed profit.</li>
+          <li>No guaranteed token value.</li>
+          <li>No guaranteed liquidity.</li>
+          <li>No guaranteed market demand.</li>
+          <li>No guaranteed exchange support.</li>
+          <li>No guaranteed future development.</li>
+        </ul>
+      </article>
+
+      <article class="card full">
+        <div class="card-num">05</div>
+        <h2>EMAIL AND WALLET SUBMISSION</h2>
+        <p>
+          The form may collect an email address and a Solana wallet address for manual access-list review. Users should never submit private keys, seed phrases, passwords, exchange login details, personal documents, or sensitive personal information. A public wallet address is enough for review. Anyone who submits information does so voluntarily.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">06</div>
+        <h2>THIRD-PARTY FORM SERVICE</h2>
+        <p>
+          The submission form may use a third-party form processor. That means data submitted through the form may pass through external infrastructure that is not controlled by Terminal Chip. Users should only submit information they are comfortable sharing for manual list review.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">07</div>
+        <h2>LOCAL DEVICE LOCK</h2>
+        <p>
+          The page may use browser-based local storage to remember whether access was already claimed from the same device. This creates a simple local lock and does not prove identity, ownership, eligibility, or wallet control. Users can clear browser storage in their browser settings.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">08</div>
+        <h2>FICTIONAL INTERFACE LANGUAGE</h2>
+        <p>
+          Terms like terminal, access, chip, signal, hidden layer, manual distribution, node, archive, or remnant are part of the fictional interface and lore experience. They should not be read as verified claims, guarantees, insider information, or official statements from any third party.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">09</div>
+        <h2>NO AFFILIATION</h2>
+        <p>
+          Terminal Chip and TATE AI are independent creative technology projects. They are not officially affiliated with, endorsed by, sponsored by, or formally connected to any public figure, celebrity, company, exchange, platform, brand, or third-party entity unless that entity confirms it through an official verified channel.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">10</div>
+        <h2>USER RESPONSIBILITY</h2>
+        <p>
+          Every user is responsible for their own research, wallet security, legal obligations, tax obligations, risk exposure, and local compliance. Do not interact with crypto assets unless you understand the risks and are legally permitted to do so in your jurisdiction.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-num">11</div>
+        <h2>AGE AND PERMISSION</h2>
+        <p>
+          Users who are not legally allowed to participate in crypto-related activity in their country, region, or age group should not submit a wallet, purchase, trade, claim, or interact with any crypto asset. Minors should involve a parent or legal guardian and follow local law.
+        </p>
+      </article>
+
+      <article class="card full">
+        <div class="card-num">12</div>
+        <h2>THE IDEA BEHIND THE CHIP</h2>
+        <p>
+          Terminal Chip exists as a symbolic access object inside the wider TATE AI universe. It represents the hidden layer: the small point of interaction where a user stops being only a viewer and becomes part of the archive pattern. The experience is built to feel quiet, selective, manual, and observed — not loud, automatic, or promotional.
+        </p>
+      </article>
+    </section>
+
+    <section class="terminal-line">
+      ACCESS DOES NOT CREATE ENTITLEMENT.<br>
+      SUBMISSION DOES NOT CREATE A PROMISE.<br>
+      THE CHIP IS A SIGNAL LAYER, NOT A GUARANTEE.
+    </section>
+
+    <div class="actions">
+      <a class="btn" href="index.html">RETURN TO CHIP</a>
+      <a class="btn" href="https://terminal-tate.github.io/tate-ai/">OPEN MAIN TERMINAL</a>
+    </div>
+
+    <footer>
+      TERMINAL CHIP / TCHIP — ACCESS NOTICE — LAST UPDATED: MAY 2026<br>
+      THIS PAGE IS INFORMATIONAL ONLY AND DOES NOT REPLACE PROFESSIONAL LEGAL, TAX, OR FINANCIAL ADVICE.
+    </footer>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    const fontSize = 15;
+    const chars = "01TCHIP";
+    let width;
+    let height;
+    let columns;
+    let drops;
+
+    function resizeMatrix() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      columns = Math.floor(width / fontSize);
+      drops = Array.from({ length: columns }, () => Math.random() * height / fontSize);
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(57, 255, 20, 0.4)";
+      ctx.font = fontSize + "px Share Tech Mono";
+
+      for (let i = 0; i < drops.length; i++) {
+        if (Math.random() > 0.58) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        }
+
+        if (drops[i] * fontSize > height && Math.random() > 0.987) {
+          drops[i] = 0;
+        }
+
+        drops[i] += 0.58;
+      }
+    }
+
+    resizeMatrix();
+    setInterval(drawMatrix, 85);
+    window.addEventListener("resize", resizeMatrix, { passive: true });
+  </script>
+</body>
+</html>
